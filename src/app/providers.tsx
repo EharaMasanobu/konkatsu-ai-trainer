@@ -1,3 +1,5 @@
+"use client";
+
 import { SessionProvider } from "@/contexts/SessionContext";
 
 interface ProvidersProps {
