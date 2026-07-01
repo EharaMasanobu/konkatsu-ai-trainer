@@ -1,33 +1,52 @@
 /**
- * 環境変数の取得（.env.local / Railway Variables 両対応）
- * Next.js は起動時に process.env へ注入するため、追加の読み込み処理は不要。
+ * 環境変数（Next.js 標準: .env.local / Railway Variables → process.env）
  */
-export function getEnv(name: string): string | undefined {
-  const value = process.env[name];
+
+export const OPENAI_API_KEY_MISSING_MESSAGE = `Missing OPENAI_API_KEY.
+
+Please configure:
+
+・.env.local (Local)
+
+or
+
+・Railway Variables (Production)`;
+
+/** process.env.OPENAI_API_KEY を正規化して取得（未設定時は undefined） */
+export function readOpenAIApiKey(): string | undefined {
+  const value = process.env.OPENAI_API_KEY;
   if (value === undefined || value.trim() === "") {
     return undefined;
   }
   return value.trim();
 }
 
-export function requireEnv(name: string): string {
-  const value = getEnv(name);
-  if (!value) {
-    throw new Error(
-      `環境変数 ${name} が設定されていません。.env.local または Railway Variables を確認してください。`,
-    );
-  }
-  return value;
-}
-
+/** API 呼び出し前の必須チェック */
 export function getOpenAIApiKey(): string {
-  return requireEnv("OPENAI_API_KEY");
+  const key = readOpenAIApiKey();
+  if (!key) {
+    throw new Error(OPENAI_API_KEY_MISSING_MESSAGE);
+  }
+  return key;
 }
 
+/** Health / 事前チェック用（boolean のみ） */
 export function isOpenAIConfigured(): boolean {
-  return getEnv("OPENAI_API_KEY") !== undefined;
+  return readOpenAIApiKey() !== undefined;
+}
+
+/** サーバー起動時に未設定ならログへ明示（プロセスは継続し Health Check は通す） */
+export function logOpenAIApiKeyStatusOnStartup(): void {
+  if (isOpenAIConfigured()) {
+    return;
+  }
+  console.error(OPENAI_API_KEY_MISSING_MESSAGE);
 }
 
 export function getDatabaseUrl(): string {
-  return getEnv("DATABASE_URL") ?? "file:./prisma/dev.db";
+  const value = process.env.DATABASE_URL;
+  if (value === undefined || value.trim() === "") {
+    return "file:./prisma/dev.db";
+  }
+  return value.trim();
 }

@@ -2,15 +2,28 @@ import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 import { GPT_MODEL } from "@/constants/openai";
-import { getEnv, getOpenAIApiKey } from "@/lib/env";
+import { getOpenAIApiKey } from "@/lib/env";
 
 export { GPT_MODEL };
+
+function resolveApiKey(explicit?: string): string | undefined {
+  if (explicit !== undefined && explicit.trim() !== "") {
+    return explicit.trim();
+  }
+
+  const key = process.env.OPENAI_API_KEY;
+  if (key === undefined || key.trim() === "") {
+    return undefined;
+  }
+
+  return key.trim();
+}
 
 export class OpenAIClient {
   private readonly client: OpenAI | null;
 
   constructor(apiKey?: string) {
-    const key = apiKey ?? getEnv("OPENAI_API_KEY");
+    const key = resolveApiKey(apiKey);
     this.client = key ? new OpenAI({ apiKey: key }) : null;
   }
 

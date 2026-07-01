@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { evaluationAI } from "@/ai/evaluationInstance";
 import { aiStateManager } from "@/ai/conversationInstance";
+import { isOpenAIConfigured, OPENAI_API_KEY_MISSING_MESSAGE } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type {
   EvaluateErrorResponse,
@@ -47,6 +48,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "conversationHistory must not be empty" } satisfies EvaluateErrorResponse,
       { status: 400 },
+    );
+  }
+
+  if (!isOpenAIConfigured()) {
+    return NextResponse.json(
+      { error: OPENAI_API_KEY_MISSING_MESSAGE } satisfies EvaluateErrorResponse,
+      { status: 503 },
     );
   }
 

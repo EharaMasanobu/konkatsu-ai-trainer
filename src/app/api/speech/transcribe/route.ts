@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { WhisperClient } from "@/ai/WhisperClient";
+import { isOpenAIConfigured, OPENAI_API_KEY_MISSING_MESSAGE } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type { TranscribeResponse } from "@/types/speechApi";
 
@@ -23,6 +24,13 @@ export async function POST(request: Request) {
 
   if (audio.size === 0) {
     return NextResponse.json({ error: "audio file is empty" }, { status: 400 });
+  }
+
+  if (!isOpenAIConfigured()) {
+    return NextResponse.json(
+      { error: OPENAI_API_KEY_MISSING_MESSAGE },
+      { status: 503 },
+    );
   }
 
   try {

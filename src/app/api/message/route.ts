@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { conversationService } from "@/ai/conversationInstance";
-import { isOpenAIConfigured } from "@/lib/env";
+import { isOpenAIConfigured, OPENAI_API_KEY_MISSING_MESSAGE } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type { MessageRequest, MessageResponse } from "@/types/messageApi";
 import type { Session } from "@/types/session";
@@ -40,10 +40,7 @@ export async function POST(request: Request) {
 
   if (!isOpenAIConfigured()) {
     return NextResponse.json(
-      {
-        error:
-          "OPENAI_API_KEY is not configured. Set it in .env.local or Railway Variables.",
-      },
+      { error: OPENAI_API_KEY_MISSING_MESSAGE },
       { status: 503 },
     );
   }

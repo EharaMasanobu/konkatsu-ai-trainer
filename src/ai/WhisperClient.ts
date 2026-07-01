@@ -5,14 +5,27 @@ import {
   WHISPER_MODEL,
   WHISPER_MODEL_FALLBACK,
 } from "@/constants/openai";
-import { getEnv, getOpenAIApiKey } from "@/lib/env";
+import { getOpenAIApiKey } from "@/lib/env";
 import { logger } from "@/lib/logger";
+
+function resolveApiKey(explicit?: string): string | undefined {
+  if (explicit !== undefined && explicit.trim() !== "") {
+    return explicit.trim();
+  }
+
+  const key = process.env.OPENAI_API_KEY;
+  if (key === undefined || key.trim() === "") {
+    return undefined;
+  }
+
+  return key.trim();
+}
 
 export class WhisperClient {
   private readonly client: OpenAI | null;
 
   constructor(apiKey?: string) {
-    const key = apiKey ?? getEnv("OPENAI_API_KEY");
+    const key = resolveApiKey(apiKey);
     this.client = key ? new OpenAI({ apiKey: key }) : null;
   }
 
