@@ -146,7 +146,8 @@ OpenAI API キーは **コードに書かず**、Next.js 標準の `process.env.
 | --- | --- | --- | --- | --- |
 | `OPENAI_API_KEY` | **はい** | `.env.local` | Variables | OpenAI API キー |
 | `DATABASE_URL` | はい* | `.env.local` | Variables | Prisma ビルド用（\*ランタイム未使用） |
-| `NODE_ENV` | いいえ | 自動 | 自動 | `development` / `production` |
+
+> **`NODE_ENV` は設定しないでください。** Railway Variables や `.env.local` に `NODE_ENV` を手動設定すると、`next build` 時に `useState` / `useContext` エラーでビルドが失敗します。Next.js / Railway が自動設定します。
 
 ### ローカル: `.env.local` の作成
 
@@ -286,7 +287,8 @@ Railway の **Project → Service → Variables** に以下を設定します。
 | --- | --- | --- | --- | --- |
 | `OPENAI_API_KEY` | **はい** | `sk-...` | 同左 | OpenAI API キー |
 | `DATABASE_URL` | はい* | `file:./prisma/dev.db` | `file:/data/prod.db` | Prisma ビルド用（\*将来 DB 利用時） |
-| `NODE_ENV` | いいえ | `development` | `production`（自動） | 実行環境 |
+
+> **`NODE_ENV` は Railway Variables に設定しないでください。** 手動設定すると Production Build が `Cannot read properties of null (reading 'useState')` で失敗します。`railway.toml` の `buildCommand` でビルド時のみ `production` を強制しています。
 
 > **OPENAI_API_KEY** はローカルでは `.env.local`、本番では Railway Variables のどちらでも `process.env.OPENAI_API_KEY` として読み込まれます。
 

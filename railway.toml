@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build"
+# Railway Variables に NODE_ENV が設定されていると next build が失敗するため、ビルド時は production を強制
+buildCommand = "NODE_ENV=production npm run build"
 
 [deploy]
 startCommand = "npm run start"
