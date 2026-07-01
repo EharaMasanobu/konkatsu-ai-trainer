@@ -223,9 +223,9 @@ Node.js **20 以上**（`package.json` の `engines` 参照）。
 | # | 確認項目 | 期待結果 |
 | --- | --- | --- |
 | 1 | トップページ | `https://<your-app>.up.railway.app/` が表示される |
-| 2 | ヘルスチェック | `GET /api/health` → `200`、`checks.openai: "configured"` |
-| 3 | 会話 API | ホームで設定 → 会話開始 → AI が返答する |
-| 4 | 環境変数未設定時 | `/api/health` が `503`、`checks.openai: "missing_openai_api_key"` |
+| 2 | ヘルスチェック | `GET /api/health` → 常に `200`（プロセス生存確認） |
+| 3 | システムチェック | `GET /api/system/check` → OpenAI 設定確認（未設定時 `503`） |
+| 4 | 会話 API | ホームで設定 → 会話開始 → AI が返答する |
 | 5 | HTTPS | 音声入力は HTTPS 環境で動作（Railway 標準対応） |
 
 #### ヘルスチェック例
@@ -237,14 +237,15 @@ curl https://<your-app>.up.railway.app/api/health
 ```json
 {
   "status": "ok",
-  "checks": {
-    "openai": "configured",
-    "databaseUrl": true,
-    "nodeEnv": "production"
-  },
-  "timestamp": "..."
+  "timestamp": "2026-06-28T12:00:00.000Z",
+  "version": "0.1.0",
+  "environment": "production",
+  "openaiConfigured": true
 }
 ```
+
+`OPENAI_API_KEY` が未設定でも `/api/health` は **常に HTTP 200** です（Railway の Health Check 互換）。  
+OpenAI 設定の確認は `/api/system/check` を使用してください。
 
 #### 会話 API の手動確認（任意）
 
@@ -264,7 +265,8 @@ curl -X POST https://<your-app>.up.railway.app/api/message \
 | --- | --- |
 | ビルド失敗 | Railway の Deploy Logs で `npm run build` のエラーを確認 |
 | `503` / OpenAI エラー | `OPENAI_API_KEY` が Variables に設定されているか確認 |
-| ヘルスチェック失敗 | `/api/health` が `200` になるまで再デプロイ |
+| ヘルスチェック失敗 | `/api/health` が `200` か確認（OpenAI 未設定でも `200` が正常） |
+| OpenAI 未設定 | `/api/system/check` が `503` → Variables に `OPENAI_API_KEY` を設定 |
 | 会話が始まらない | ブラウザの Network タブで `/api/message` のステータスを確認 |
 
 ---
