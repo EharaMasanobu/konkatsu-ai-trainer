@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AIStateDebugPanel } from "@/components/conversation/AIStateDebugPanel";
+import { EmotionDebugPanel } from "@/components/conversation/EmotionDebugPanel";
+import { FlowDebugPanel } from "@/components/conversation/FlowDebugPanel";
+import { RomanceDebugPanel } from "@/components/conversation/RomanceDebugPanel";
 import { MemoryDebugPanel } from "@/components/conversation/MemoryDebugPanel";
 import { PromptDebugPanel } from "@/components/conversation/PromptDebugPanel";
 import { TopicDebugPanel } from "@/components/conversation/TopicDebugPanel";
@@ -19,7 +22,10 @@ import { MessageService } from "@/services/MessageService";
 import type { Evaluation } from "@/types/Evaluation";
 import type {
   AIStateDebugSnapshot,
+  EmotionDebugSnapshot,
+  FlowDebugSnapshot,
   MemoryDebugSnapshot,
+  RomanceDebugSnapshot,
   TopicDebugSnapshot,
 } from "@/types/messageApi";
 
@@ -40,6 +46,9 @@ export function ConversationPage() {
   const [debugState, setDebugState] = useState<AIStateDebugSnapshot | null>(null);
   const [debugTopic, setDebugTopic] = useState<TopicDebugSnapshot | null>(null);
   const [debugMemory, setDebugMemory] = useState<MemoryDebugSnapshot | null>(null);
+  const [debugEmotion, setDebugEmotion] = useState<EmotionDebugSnapshot | null>(null);
+  const [debugRomance, setDebugRomance] = useState<RomanceDebugSnapshot | null>(null);
+  const [debugFlow, setDebugFlow] = useState<FlowDebugSnapshot | null>(null);
   const [debugPromptPreview, setDebugPromptPreview] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +121,9 @@ export function ConversationPage() {
           debugState: nextDebugState,
           debugTopic: nextDebugTopic,
           debugMemory: nextDebugMemory,
+          debugEmotion: nextDebugEmotion,
+          debugRomance: nextDebugRomance,
+          debugFlow: nextDebugFlow,
           debugPromptPreview: nextDebugPromptPreview,
         } = await messageService.sendMessage({
           session,
@@ -129,6 +141,15 @@ export function ConversationPage() {
         }
         if (isDev && nextDebugMemory) {
           setDebugMemory(nextDebugMemory);
+        }
+        if (isDev && nextDebugEmotion) {
+          setDebugEmotion(nextDebugEmotion);
+        }
+        if (isDev && nextDebugRomance) {
+          setDebugRomance(nextDebugRomance);
+        }
+        if (isDev && nextDebugFlow) {
+          setDebugFlow(nextDebugFlow);
         }
         if (isDev && nextDebugPromptPreview) {
           setDebugPromptPreview(nextDebugPromptPreview);
@@ -209,6 +230,9 @@ export function ConversationPage() {
       <ConversationHeader currentTurn={displayTurn} maxTurn={maxTurn} />
 
       {isDev && debugState && <AIStateDebugPanel state={debugState} />}
+      {isDev && debugEmotion && <EmotionDebugPanel emotion={debugEmotion} />}
+      {isDev && debugRomance && <RomanceDebugPanel romance={debugRomance} />}
+      {isDev && debugFlow && <FlowDebugPanel flow={debugFlow} />}
       {isDev && debugTopic && <TopicDebugPanel topic={debugTopic} />}
       {isDev && debugMemory && <MemoryDebugPanel memory={debugMemory} />}
       {isDev && debugPromptPreview && (

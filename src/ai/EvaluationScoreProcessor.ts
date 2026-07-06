@@ -4,17 +4,26 @@ import {
   sumItemScores,
 } from "@/constants/evaluationScoring";
 import type { DifficultyType } from "@/constants/homeOptions";
+import type { FemaleEmotionState } from "@/ai/emotion/FemaleEmotionState";
+import type { RomanceResult } from "@/ai/romance/RomanceState";
 import type { Evaluation, EvaluationRawResult } from "@/types/Evaluation";
 
 export class EvaluationScoreProcessor {
   finalize(
     raw: EvaluationRawResult,
     difficulty: DifficultyType,
+    femaleEmotion?: FemaleEmotionState,
+    romance?: RomanceResult,
   ): Evaluation {
     const baseScore = sumItemScores(raw.itemScores);
-    const difficultyAdjustment = applyDifficultyAdjustment(baseScore, difficulty) - baseScore;
     const score = applyDifficultyAdjustment(baseScore, difficulty);
+    const difficultyAdjustment = score - baseScore;
+
     const { verdict, stars, bandLabel } = resolveVerdict(score);
+
+    if (!romance) {
+      throw new Error("RomanceResult is required for evaluation finalize");
+    }
 
     return {
       score,
@@ -22,6 +31,7 @@ export class EvaluationScoreProcessor {
       difficultyAdjustment,
       difficulty,
       itemScores: raw.itemScores,
+      internalReasons: raw.internalReasons,
       characterAdaptationScore: raw.characterAdaptationScore,
       characterAdaptationStars: raw.characterAdaptationStars,
       characterAdaptationReason: raw.characterAdaptationReason,
@@ -37,6 +47,8 @@ export class EvaluationScoreProcessor {
       verdict,
       stars,
       bandLabel,
+      finalFemaleEmotion: femaleEmotion,
+      romance,
     };
   }
 }

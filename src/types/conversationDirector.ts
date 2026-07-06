@@ -1,6 +1,13 @@
 import type { AIState } from "@/ai/state/AIState";
+import type { FemaleEmotionState } from "@/ai/emotion/FemaleEmotionState";
 import type { TopicState } from "@/ai/topic/TopicState";
-import type { MemoryDebugSnapshot, TopicDebugSnapshot } from "@/types/messageApi";
+import type {
+  EmotionDebugSnapshot,
+  FlowDebugSnapshot,
+  MemoryDebugSnapshot,
+  RomanceDebugSnapshot,
+  TopicDebugSnapshot,
+} from "@/types/messageApi";
 import type { ConversationHistoryMessage } from "@/types/promptBuilder";
 import type { Session } from "@/types/session";
 
@@ -18,6 +25,10 @@ export interface ProcessTurnResult {
   debugTopic?: TopicDebugSnapshot;
   debugMemory?: MemoryDebugSnapshot;
   /** Development 環境のみ返却 */
+  debugEmotion?: EmotionDebugSnapshot;
+  /** Development 環境のみ返却（内部スコア含む） */
+  debugRomance?: RomanceDebugSnapshot;
+  debugFlow?: FlowDebugSnapshot;
   debugPromptPreview?: string;
 }
 

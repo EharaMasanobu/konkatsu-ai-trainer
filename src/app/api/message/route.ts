@@ -69,6 +69,9 @@ export async function POST(request: Request) {
       ...(result.debugPromptPreview
         ? { debugPromptPreview: result.debugPromptPreview }
         : {}),
+      ...(result.debugEmotion ? { debugEmotion: result.debugEmotion } : {}),
+      ...(result.debugRomance ? { debugRomance: result.debugRomance } : {}),
+      ...(result.debugFlow ? { debugFlow: result.debugFlow } : {}),
     };
     return NextResponse.json(response);
   } catch (error) {

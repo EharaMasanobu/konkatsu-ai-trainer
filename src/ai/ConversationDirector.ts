@@ -1,5 +1,9 @@
 import { OpenAIClient } from "@/ai/OpenAIClient";
 import { PromptBuilder } from "@/ai/prompt/PromptBuilder";
+import { EmotionManager } from "@/ai/emotion/EmotionManager";
+import { ConversationFlowManager } from "@/ai/flow/ConversationFlowManager";
+import { RomanceManager } from "@/ai/romance/RomanceManager";
+import { resolveConversationDifficulty } from "@/constants/conversationDifficulty";
 import { getConversationTurn, getHiddenGoalEnum } from "@/ai/state/AIState";
 import { AIStateManager } from "@/ai/state/AIStateManager";
 import { MemoryManager } from "@/ai/memory/MemoryManager";
@@ -12,7 +16,13 @@ import type {
   ProcessTurnInput,
   ProcessTurnResult,
 } from "@/types/conversationDirector";
-import type { MemoryDebugSnapshot, TopicDebugSnapshot } from "@/types/messageApi";
+import type {
+  EmotionDebugSnapshot,
+  FlowDebugSnapshot,
+  MemoryDebugSnapshot,
+  RomanceDebugSnapshot,
+  TopicDebugSnapshot,
+} from "@/types/messageApi";
 import type { PromptContext } from "@/types/PromptContext";
 
 export class ConversationDirector {
@@ -20,6 +30,9 @@ export class ConversationDirector {
     private readonly aiStateManager: AIStateManager,
     private readonly topicManager: TopicManager,
     private readonly memoryManager: MemoryManager,
+    private readonly emotionManager: EmotionManager,
+    private readonly romanceManager: RomanceManager,
+    private readonly flowManager: ConversationFlowManager,
     private readonly promptBuilder: PromptBuilder,
     private readonly openAIClient: OpenAIClient,
   ) {}
@@ -34,6 +47,16 @@ export class ConversationDirector {
     if (!this.memoryManager.getStore(sessionId)) {
       this.memoryManager.create(sessionId);
     }
+
+    if (!this.emotionManager.get(sessionId)) {
+      this.emotionManager.create(sessionId);
+    }
+
+    if (!this.romanceManager.get(sessionId)) {
+      this.romanceManager.create(sessionId);
+    }
+
+    this.flowManager.ensureSession(sessionId);
 
     return { aiState, topicState };
   }
@@ -55,6 +78,37 @@ export class ConversationDirector {
       currentTopic: topicState.current,
     });
 
+    const conversationDifficulty = resolveConversationDifficulty(
+      input.session.homeForm.personalitySetting.difficulty,
+    );
+
+    const emotionLog = this.emotionManager.update(sessionId, {
+      userMessage: input.userMessage,
+      assistantMessage: "",
+      conversationHistory: input.conversationHistory,
+    });
+
+    const romanceLog = this.romanceManager.updateFromEmotion(
+      sessionId,
+      emotionLog.state,
+      emotionLog.changes,
+    );
+
+    const maxTurn = input.session.homeForm.conversationSetting.maxTurn;
+    const currentTurn = getConversationTurn(stateForPrompt) + 1;
+
+    const flowDecision = this.flowManager.decide(sessionId, {
+      emotion: emotionLog.state,
+      romanceScore: romanceLog.newScore,
+      conversationHistory: input.conversationHistory,
+      userMessage: input.userMessage,
+      difficulty: conversationDifficulty,
+      personality: input.session.homeForm.personalitySetting.personality,
+      conversationStyle: input.session.homeForm.personalitySetting.conversationStyle,
+      currentTurn,
+      maxTurn,
+    });
+
     const promptContext: PromptContext = {
       session: input.session,
       conversationHistory: input.conversationHistory,
@@ -62,13 +116,18 @@ export class ConversationDirector {
       aiState: stateForPrompt,
       topic: topicState,
       memories: relevantMemories,
+      conversationDifficulty,
+      femaleEmotion: emotionLog.state,
+      romanceStateDescription: this.romanceManager.formatPromptGuidance(sessionId),
+      flowGuidance: flowDecision.promptGuidance,
     };
 
     const promptResult = this.promptBuilder.build(promptContext);
     const reply = await this.openAIClient.chat(promptResult.messages);
 
-    const maxTurn = input.session.homeForm.conversationSetting.maxTurn;
-    const willEnd = aiState.conversation.turn + 1 >= maxTurn;
+    const willEnd =
+      flowDecision.shouldEndConversation ||
+      aiState.conversation.turn + 1 >= maxTurn;
 
     const updatedState = this.aiStateManager.update(sessionId, {
       userMessage: input.userMessage,
@@ -98,7 +157,7 @@ export class ConversationDirector {
       currentTurn: turn,
     });
 
-    const shouldEnd = turn >= maxTurn;
+    const shouldEnd = turn >= maxTurn || flowDecision.shouldEndConversation;
 
     const result: ProcessTurnResult = {
       reply,
@@ -113,6 +172,9 @@ export class ConversationDirector {
         this.memoryManager.getAll(sessionId),
       );
       result.debugPromptPreview = promptResult.preview;
+      result.debugEmotion = buildEmotionDebug(emotionLog);
+      result.debugRomance = buildRomanceDebug(romanceLog);
+      result.debugFlow = buildFlowDebug(flowDecision, currentTurn);
     }
 
     return result;
@@ -123,6 +185,9 @@ export class ConversationDirector {
     const finalTurn = aiState ? getConversationTurn(aiState) : 0;
 
     this.aiStateManager.reset(sessionId);
+    this.emotionManager.reset(sessionId);
+    this.romanceManager.reset(sessionId);
+    this.flowManager.reset(sessionId);
 
     return { sessionId, finalTurn };
   }
@@ -156,5 +221,43 @@ function buildMemoryDebug(
   return {
     longTerm: store.longTerm.map((m) => toItem(m, "long")),
     shortTerm: store.shortTerm.map((m) => toItem(m, "short")),
+  };
+}
+
+function buildEmotionDebug(
+  log: import("@/ai/emotion/EmotionManager").EmotionTurnLog,
+): EmotionDebugSnapshot {
+  return {
+    state: log.state,
+    turn: log.turn,
+    changes: log.changes.map((change) => ({
+      field: change.field,
+      delta: change.delta,
+      reason: change.reason,
+    })),
+  };
+}
+
+function buildRomanceDebug(
+  log: import("@/ai/romance/RomanceState").RomanceTurnLog,
+): RomanceDebugSnapshot {
+  return {
+    turn: log.turn,
+    previousScore: log.previousScore,
+    newScore: log.newScore,
+    delta: log.delta,
+    reasons: log.reasons,
+  };
+}
+
+function buildFlowDebug(
+  decision: import("@/ai/flow/FlowState").FlowDecision,
+  turn: number,
+): FlowDebugSnapshot {
+  return {
+    turn,
+    state: decision.state,
+    reasons: decision.reasons,
+    shouldEndConversation: decision.shouldEndConversation,
   };
 }

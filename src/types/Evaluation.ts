@@ -1,28 +1,33 @@
 import type { AIState } from "@/ai/state/AIState";
-import type { DifficultyType } from "@/constants/homeOptions";
-import type { ConversationHistoryMessage } from "@/types/promptBuilder";
+import type { FemaleEmotionState } from "@/ai/emotion/FemaleEmotionState";
+import type { RomanceResult } from "@/ai/romance/RomanceState";
+import type { DifficultyType } from "@/constants/homeOptions";import type { ConversationHistoryMessage } from "@/types/promptBuilder";
 import type { Session } from "@/types/session";
 
 export type EvaluationVerdict =
   | "ぜひまた会いたい"
   | "もう一度会ってみたい"
-  | "迷う"
+  | "まあまあ良い印象"
+  | "普通"
   | "厳しい"
   | "お断りしたい";
 
+/** Version3: 女性視点の評価軸 */
 export interface EvaluationItemScores {
-  /** 共感力（満点20） */
-  empathy: number;
-  /** 質問力（満点20） */
-  question: number;
-  /** 自己開示（満点15） */
-  selfDisclosure: number;
-  /** 深掘り力（満点15） */
-  depth: number;
-  /** 会話の自然さ（満点15） */
+  /** 安心感（満点15） */
+  senseOfSecurity: number;
+  /** 話しやすさ（満点15） */
+  easeOfTalking: number;
+  /** 自然さ（満点15） */
   naturalness: number;
-  /** 婚活らしさ（満点15） */
-  konkatsuFit: number;
+  /** 質問力（満点15） */
+  questionSkill: number;
+  /** 共感力（満点15） */
+  empathy: number;
+  /** 押し付け感の無さ（満点15） */
+  nonPushiness: number;
+  /** また会いたいと思えたか（満点10） */
+  wouldMeetAgain: number;
 }
 
 export interface EvaluationImprovement {
@@ -34,6 +39,25 @@ export interface EvaluationImprovement {
   modelAnswer: string;
 }
 
+/** 採点・加点・減点の内部理由（将来のレーダーチャート・履歴・分析画面用） */
+export interface EvaluationReasonEntry {
+  category: keyof EvaluationItemScores | "overall";
+  type: "bonus" | "deduction";
+  points: number;
+  reason: string;
+  /** 会話からの具体的引用 */
+  conversationQuote: string;
+}
+
+export interface EvaluationInternalReasons {
+  /** 採点理由（総合判断の根拠） */
+  scoringReasons: EvaluationReasonEntry[];
+  /** 加点理由 */
+  bonusReasons: EvaluationReasonEntry[];
+  /** 減点理由 */
+  deductionReasons: EvaluationReasonEntry[];
+}
+
 export interface Evaluation {
   /** 難易度補正後の総合点（0〜100） */
   score: number;
@@ -43,6 +67,8 @@ export interface Evaluation {
   difficultyAdjustment: number;
   difficulty: DifficultyType;
   itemScores: EvaluationItemScores;
+  /** 採点・加点・減点の内部データ */
+  internalReasons: EvaluationInternalReasons;
   /** 性格への適合度（0〜100） */
   characterAdaptationScore: number;
   /** 性格適合の星評価（1〜5） */
@@ -57,7 +83,7 @@ export interface Evaluation {
   characterNextFocus: string[];
   /** 性格適合に関する総合フィードバック（表示用） */
   characterFeedback: string;
-  /** 総評（改善点を重視） */
+  /** 総評（会話引用を含む具体的フィードバック） */
   summary: string;
   /** 女性心理の分析（文章） */
   femalePsychology: string;
@@ -71,17 +97,24 @@ export interface Evaluation {
   /** 1〜5 の星評価 */
   stars: number;
   bandLabel: string;
+  /** 会話終了時の女性感情（EmotionManager） */
+  finalFemaleEmotion?: FemaleEmotionState;
+  /** 恋愛判定（RomanceManager — 会話スコアとは独立） */
+  romance: RomanceResult;
 }
 
 export interface EvaluationAIInput {
   session: Session;
   conversationHistory: ConversationHistoryMessage[];
   aiState?: AIState;
+  femaleEmotion?: FemaleEmotionState;
+  romance?: RomanceResult;
 }
 
 /** LLM が返す生データ（難易度補正・判定はサーバー側） */
 export interface EvaluationRawResult {
   itemScores: EvaluationItemScores;
+  internalReasons: EvaluationInternalReasons;
   characterAdaptationScore: number;
   characterAdaptationStars: number;
   characterAdaptationReason: string;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { evaluationAI } from "@/ai/evaluationInstance";
-import { aiStateManager } from "@/ai/conversationInstance";
+import { evaluationManager } from "@/ai/evaluationInstance";
+import { aiStateManager, emotionManager, romanceManager } from "@/ai/conversationInstance";
 import { isOpenAIConfigured, OPENAI_API_KEY_MISSING_MESSAGE } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type {
@@ -61,11 +61,15 @@ export async function POST(request: Request) {
   try {
     const session = toSession(body.session);
     const aiState = aiStateManager.get(session.sessionId);
+    const femaleEmotion = emotionManager.get(session.sessionId);
+    const romance = romanceManager.buildFinalResult(session.sessionId);
 
-    const evaluation = await evaluationAI.evaluate({
+    const evaluation = await evaluationManager.evaluate({
       session,
       conversationHistory: body.conversationHistory,
       aiState,
+      femaleEmotion,
+      romance,
     });
 
     const response: EvaluateResponse = { evaluation };

@@ -3,6 +3,7 @@ import { EvaluationScoreProcessor } from "@/ai/EvaluationScoreProcessor";
 import { OpenAIClient } from "@/ai/OpenAIClient";
 import { evaluationSchema } from "@/schemas/evaluationSchema";
 import type { Evaluation, EvaluationAIInput, EvaluationRawResult } from "@/types/Evaluation";
+import type { RomanceResult } from "@/ai/romance/RomanceState";
 import { logger } from "@/lib/logger";
 const MAX_PARSE_RETRIES = 2;
 
@@ -38,6 +39,8 @@ export class EvaluationAI {
         return this.scoreProcessor.finalize(
           parsed,
           input.session.homeForm.personalitySetting.difficulty,
+          input.femaleEmotion,
+          input.romance,
         );
       } catch (error) {        lastError = error;
 

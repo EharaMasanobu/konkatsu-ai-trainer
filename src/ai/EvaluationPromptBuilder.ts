@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 import { formatAIStateForEvaluationPrompt } from "@/ai/state/evaluationStateFormat";
+import { formatFemaleEmotionForEvaluation } from "@/ai/emotion/EmotionPromptFormatter";
 import { EvaluationCharacterContextBuilder } from "@/ai/EvaluationCharacterContextBuilder";
 import { DIFFICULTY_BEHAVIOR } from "@/constants/difficultyBehavior";
 import type { EvaluationAIInput } from "@/types/Evaluation";
@@ -43,6 +44,7 @@ export class EvaluationPromptBuilder {
     const { homeForm } = session;
 
     const stateVars = formatAIStateForEvaluationPrompt(aiState);
+    const emotionVars = formatFemaleEmotionForEvaluation(input.femaleEmotion);
 
     return this.applyTemplate(this.loadEvaluationTemplate(), {
       user_profile: this.formatProfile(homeForm.userProfile),
@@ -60,6 +62,12 @@ export class EvaluationPromptBuilder {
       trust: stateVars.trust,
       romance: stateVars.romance,
       conversation_count: stateVars.conversation_count,
+      female_emotion_comfort: emotionVars.female_emotion_comfort,
+      female_emotion_interest: emotionVars.female_emotion_interest,
+      female_emotion_tension: emotionVars.female_emotion_tension,
+      female_emotion_guard: emotionVars.female_emotion_guard,
+      female_emotion_fatigue: emotionVars.female_emotion_fatigue,
+      female_emotion_context: emotionVars.female_emotion_context,
       conversation_history: this.formatConversationHistory(conversationHistory),
     });
   }

@@ -1,3 +1,5 @@
+import type { FemaleEmotionState } from "@/ai/emotion/FemaleEmotionState";
+import type { ConversationDifficulty } from "@/constants/conversationDifficulty";
 import type { AIState } from "@/ai/state/AIState";
 import type { TopicState } from "@/ai/topic/TopicState";
 import type { Memory } from "@/types/Memory";
@@ -11,6 +13,14 @@ export interface PromptContext {
   aiState: AIState;
   topic: TopicState;
   memories: Memory[];
+  /** ConversationDirector が解決した会話難易度 */
+  conversationDifficulty: ConversationDifficulty;
+  /** EmotionManager が管理する女性の感情状態 */
+  femaleEmotion: FemaleEmotionState;
+  /** RomanceManager が生成する定性表現（数値は含めない） */
+  romanceStateDescription: string;
+  /** ConversationFlowManager が生成する返答方針 */
+  flowGuidance: string;
 }
 
 export interface PromptSection {
@@ -24,8 +34,11 @@ export type PromptSectionId =
   | "purpose"
   | "character"
   | "characterProfile"
+  | "conversationDifficulty"
   | "conversationRule"
   | "emotion"
+  | "romance"
+  | "flow"
   | "topic"
   | "memory"
   | "hiddenGoal"

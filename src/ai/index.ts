@@ -7,9 +7,28 @@ export {
   EvaluationCoachError,
 } from "@/ai/EvaluationCoach";
 export { EvaluationCoachPromptBuilder } from "@/ai/EvaluationCoachPromptBuilder";
-export { evaluationAI } from "@/ai/evaluationInstance";
+export { evaluationManager, evaluationAI } from "@/ai/evaluationInstance";
+export { EvaluationManager, EvaluationAIError } from "@/ai/EvaluationManager";
+export {
+  EmotionManager,
+  type EmotionTurnLog,
+  type FemaleEmotionState,
+  FEMALE_EMOTION_LABELS,
+} from "@/ai/emotion";
+export {
+  ConversationFlowManager,
+  FLOW_STATE_LABELS,
+  type FlowDecision,
+  type FlowState,
+  type FlowTurnLog,
+} from "@/ai/flow";
+export {
+  RomanceManager,
+  type RomanceResult,
+  type RomanceTurnLog,
+} from "@/ai/romance";
 export { ConversationAI, type ConversationAIResult } from "@/ai/ConversationAI";
-export { EvaluationAI, EvaluationAIError } from "@/ai/EvaluationAI";
+export { EvaluationAI } from "@/ai/EvaluationAI";
 export { EvaluationScoreProcessor } from "@/ai/EvaluationScoreProcessor";
 export { EvaluationCharacterContextBuilder } from "@/ai/EvaluationCharacterContextBuilder";
 export { EvaluationPromptBuilder } from "@/ai/EvaluationPromptBuilder";

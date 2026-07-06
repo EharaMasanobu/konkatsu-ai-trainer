@@ -1,7 +1,8 @@
 import type { DifficultyType } from "@/constants/homeOptions";
 
+/** 難易度の概要（評価プロンプト等で使用） */
 export const DIFFICULTY_BEHAVIOR: Record<DifficultyType, string> = {
-  Easy: "積極的に会話を続け、相手に興味を示し、会話のきっかけを作る",
-  Normal: "自然な距離感を保ち、普通の婚活初対面のように会話する",
-  Hard: "相手次第で興味を失い、会話が続かないこともある。距離を感じさせることもある",
+  Easy: "練習向け。女性は時々質問・リアクション多めだが、会話の主導は男性。",
+  Normal: "現実的なお見合い。女性は必要最低限だけ話し、男性が広げれば会話が続く。",
+  Hard: "本番に近い。女性はほぼ質問せず短く返す。男性が頑張らないと沈黙する。",
 };

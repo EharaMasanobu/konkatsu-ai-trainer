@@ -1,42 +1,43 @@
 import type { DifficultyType } from "@/constants/homeOptions";
 import type { EvaluationItemScores, EvaluationVerdict } from "@/types/Evaluation";
 
+/** Version3: 女性視点の評価軸（合計100点） */
 export const EVALUATION_ITEM_MAX: Record<keyof EvaluationItemScores, number> = {
-  empathy: 20,
-  question: 20,
-  selfDisclosure: 15,
-  depth: 15,
+  senseOfSecurity: 15,
+  easeOfTalking: 15,
   naturalness: 15,
-  konkatsuFit: 15,
+  questionSkill: 15,
+  empathy: 15,
+  nonPushiness: 15,
+  wouldMeetAgain: 10,
 };
 
 export const EVALUATION_ITEM_LABELS: Record<keyof EvaluationItemScores, string> = {
+  senseOfSecurity: "安心感",
+  easeOfTalking: "話しやすさ",
+  naturalness: "自然さ",
+  questionSkill: "質問力",
   empathy: "共感力",
-  question: "質問力",
-  selfDisclosure: "自己開示",
-  depth: "深掘り力",
-  naturalness: "会話の自然さ",
-  konkatsuFit: "婚活らしさ",
+  nonPushiness: "押し付け感の無さ",
+  wouldMeetAgain: "また会いたいと思えたか",
 };
 
-/** 難易度による総合点補正（サーバー側で適用） */
+/** 難易度による総合点補正（最小限。採点はLLM側で難易度考慮済み） */
 export const DIFFICULTY_SCORE_ADJUSTMENT: Record<DifficultyType, number> = {
-  Easy: 15,
+  Easy: 3,
   Normal: 0,
-  Hard: -10,
+  Hard: -3,
 };
-
-/** 将来拡張用 */
-export const EXTREME_DIFFICULTY_SCORE_ADJUSTMENT = -20;
 
 export function sumItemScores(itemScores: EvaluationItemScores): number {
   return (
-    itemScores.empathy +
-    itemScores.question +
-    itemScores.selfDisclosure +
-    itemScores.depth +
+    itemScores.senseOfSecurity +
+    itemScores.easeOfTalking +
     itemScores.naturalness +
-    itemScores.konkatsuFit
+    itemScores.questionSkill +
+    itemScores.empathy +
+    itemScores.nonPushiness +
+    itemScores.wouldMeetAgain
   );
 }
 
@@ -48,6 +49,11 @@ export function applyDifficultyAdjustment(
   return Math.max(0, Math.min(100, baseScore + delta));
 }
 
+/**
+ * Version3 採点バンド（60点は平均ではない）
+ * 30〜40: かなり苦戦 / 50: 普通 / 60: 少し良い
+ * 70: かなり良い / 80: 婚活で十分通用 / 90+: かなり難しい
+ */
 export function resolveVerdict(score: number): {
   verdict: EvaluationVerdict;
   stars: number;
@@ -57,35 +63,42 @@ export function resolveVerdict(score: number): {
     return {
       verdict: "ぜひまた会いたい",
       stars: 5,
-      bandLabel: "ぜひもう一度会いたい",
+      bandLabel: "かなり難しい到達点。婚活でもトップクラスの印象",
     };
   }
-  if (score >= 75) {
+  if (score >= 80) {
+    return {
+      verdict: "もう一度会ってみたい",
+      stars: 5,
+      bandLabel: "婚活で十分通用する会話力",
+    };
+  }
+  if (score >= 70) {
     return {
       verdict: "もう一度会ってみたい",
       stars: 4,
-      bandLabel: "かなり好印象。次回デートの可能性が高い",
+      bandLabel: "かなり良い。次回デートの可能性が高い",
     };
   }
   if (score >= 60) {
     return {
-      verdict: "迷う",
+      verdict: "まあまあ良い印象",
       stars: 3,
-      bandLabel: "悪くはないが、決め手に欠ける",
+      bandLabel: "少し良い。決め手に欠ける部分もある",
     };
   }
-  if (score >= 40) {
+  if (score >= 50) {
+    return {
+      verdict: "普通",
+      stars: 3,
+      bandLabel: "普通。特筆すべき強み・弱点は少ない",
+    };
+  }
+  if (score >= 30) {
     return {
       verdict: "厳しい",
       stars: 2,
-      bandLabel: "婚活では厳しい。改善が必要",
-    };
-  }
-  if (score >= 20) {
-    return {
-      verdict: "厳しい",
-      stars: 2,
-      bandLabel: "次回デートはかなり難しい",
+      bandLabel: "かなり苦戦。会話が続かない場面が多い",
     };
   }
   return {

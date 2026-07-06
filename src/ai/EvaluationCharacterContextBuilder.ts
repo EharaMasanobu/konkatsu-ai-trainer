@@ -19,7 +19,7 @@ export class EvaluationCharacterContextBuilder {  build(
     const hiddenGoal = aiState ? getHiddenGoalEnum(aiState) : HiddenGoal.HOBBY;
     const hiddenGoalRule =
       HIDDEN_GOAL_EVALUATION_RULES[hiddenGoal] ??
-      "Hidden Goal に関連する話題へ自然に触れられていない → depth から減点";
+      "Hidden Goal に関連する話題へ男性から自然に触れられていない → questionSkill から減点";
 
     return [
       "# Character Aware Evaluation（性格考慮型評価）",
@@ -56,9 +56,10 @@ export class EvaluationCharacterContextBuilder {  build(
       "## 採点上の注意",
       "",
       "- 話が上手でも、**性格に合っていなければ積極的に減点**してください",
-      "- 同じ返答でも、明るい女性には低く、おとなしい女性には高く評価されるケースがあり得ます",
-      "- `characterAdaptationScore` は性格への適合度（0〜100）を別途評価してください",
-      "- 総合 `itemScores` にも性格適合の不足は反映してください",
+      "- 女性は会話をリードしない。男性のリード力を評価してください",
+      "- **50点が普通**です。60点は「少し良い」レベルです",
+      "- `internalReasons` に採点・加点・減点理由を必ず記録してください",
+      "- コメントには会話引用を必ず含めてください。抽象表現は禁止です",
     ].join("\n");
   }
 }

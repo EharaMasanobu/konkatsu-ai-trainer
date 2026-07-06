@@ -37,15 +37,6 @@ function ItemScoreBar({
   );
 }
 
-function StarRating({ stars }: { stars: number }) {
-  return (
-    <p className="text-2xl tracking-widest text-amber-500" aria-label={`${stars}つ星`}>
-      {"★".repeat(stars)}
-      {"☆".repeat(5 - stars)}
-    </p>
-  );
-}
-
 export function EvaluationScore({ evaluation }: EvaluationScoreProps) {
   const itemEntries = Object.entries(EVALUATION_ITEM_LABELS) as Array<
     [keyof typeof EVALUATION_ITEM_LABELS, string]
@@ -54,7 +45,7 @@ export function EvaluationScore({ evaluation }: EvaluationScoreProps) {
   return (
     <section className="space-y-6">
       <div className="text-center">
-        <p className="text-sm font-medium text-zinc-500">総合評価</p>
+        <p className="text-sm font-medium text-zinc-500">会話スコア</p>
         <p className="mt-2 text-6xl font-bold text-rose-600">{evaluation.score}</p>
         <p className="text-sm text-zinc-500">/ 100点</p>
         {evaluation.difficultyAdjustment !== 0 && (
@@ -66,19 +57,7 @@ export function EvaluationScore({ evaluation }: EvaluationScoreProps) {
               : null}
           </p>
         )}
-      </div>
-
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-center">
-        <p className="text-xs font-medium text-amber-700">判定</p>
-        <StarRating stars={evaluation.stars} />
-        <p className="mt-2 text-base font-semibold text-amber-900">
-          {evaluation.verdict}
-        </p>
-        <p className="mt-1 text-sm text-amber-800">{evaluation.bandLabel}</p>
-        <p className="mt-3 text-sm text-amber-900">
-          もう一度会いたい確率:{" "}
-          <span className="font-bold">{evaluation.remeetProbability}%</span>
-        </p>
+        <p className="mt-2 text-sm text-zinc-600">{evaluation.bandLabel}</p>
       </div>
 
       <div className="space-y-4">

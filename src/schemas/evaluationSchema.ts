@@ -3,16 +3,56 @@ import { z } from "zod";
 import { EVALUATION_ITEM_MAX } from "@/constants/evaluationScoring";
 
 const itemScoresSchema = z.object({
-  empathy: z.number().int().min(0).max(EVALUATION_ITEM_MAX.empathy),
-  question: z.number().int().min(0).max(EVALUATION_ITEM_MAX.question),
-  selfDisclosure: z
+  senseOfSecurity: z
     .number()
     .int()
     .min(0)
-    .max(EVALUATION_ITEM_MAX.selfDisclosure),
-  depth: z.number().int().min(0).max(EVALUATION_ITEM_MAX.depth),
+    .max(EVALUATION_ITEM_MAX.senseOfSecurity),
+  easeOfTalking: z
+    .number()
+    .int()
+    .min(0)
+    .max(EVALUATION_ITEM_MAX.easeOfTalking),
   naturalness: z.number().int().min(0).max(EVALUATION_ITEM_MAX.naturalness),
-  konkatsuFit: z.number().int().min(0).max(EVALUATION_ITEM_MAX.konkatsuFit),
+  questionSkill: z
+    .number()
+    .int()
+    .min(0)
+    .max(EVALUATION_ITEM_MAX.questionSkill),
+  empathy: z.number().int().min(0).max(EVALUATION_ITEM_MAX.empathy),
+  nonPushiness: z
+    .number()
+    .int()
+    .min(0)
+    .max(EVALUATION_ITEM_MAX.nonPushiness),
+  wouldMeetAgain: z
+    .number()
+    .int()
+    .min(0)
+    .max(EVALUATION_ITEM_MAX.wouldMeetAgain),
+});
+
+const reasonEntrySchema = z.object({
+  category: z.enum([
+    "senseOfSecurity",
+    "easeOfTalking",
+    "naturalness",
+    "questionSkill",
+    "empathy",
+    "nonPushiness",
+    "wouldMeetAgain",
+    "overall",
+  ]),
+  type: z.enum(["bonus", "deduction"]),
+  points: z.number().int().min(1).max(20),
+  reason: z.string().min(1),
+  conversationQuote: z.string().min(1),
+});
+
+const internalReasonsSchema = z.object({
+  scoringReasons: z.array(reasonEntrySchema).min(2),
+  bonusReasons: z.array(reasonEntrySchema).min(1),
+  deductionReasons: z.array(reasonEntrySchema).min(2),
 });
 
 const improvementSchema = z.object({
@@ -24,6 +64,7 @@ const improvementSchema = z.object({
 
 export const evaluationSchema = z.object({
   itemScores: itemScoresSchema,
+  internalReasons: internalReasonsSchema,
   characterAdaptationScore: z.number().int().min(0).max(100),
   characterAdaptationStars: z.number().int().min(1).max(5),
   characterAdaptationReason: z.string().min(1),

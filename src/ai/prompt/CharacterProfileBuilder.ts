@@ -1,4 +1,8 @@
 import { getCharacterProfileTraits } from "@/constants/characterProfiles";
+import {
+  CONVERSATION_STYLE_TRAITS,
+  getConversationStyleTraits,
+} from "@/constants/conversationStyleTraits";
 import type { PersonalityType } from "@/constants/homeOptions";
 import type { RelationshipState } from "@/ai/state/AIState";
 import type { CharacterProfile } from "@/types/characterProfile";
@@ -7,17 +11,22 @@ import type { PromptContext } from "@/types/PromptContext";
 const TRUST_LOW = 40;
 const TRUST_HIGH = 65;
 const INTEREST_LOW = 40;
-const INTEREST_HIGH = 65;
 const COMFORT_LOW = 40;
-const COMFORT_HIGH = 65;
 
 export class CharacterProfileBuilder {
   build(context: PromptContext): CharacterProfile {
-    const personality = context.session.homeForm.personalitySetting.personality;
-    const traitLines = [...getCharacterProfileTraits(personality)];
+    const { personality, conversationStyle } =
+      context.session.homeForm.personalitySetting;
+    const traitLines = [
+      ...getCharacterProfileTraits(personality),
+      "",
+      `【会話スタイル: ${CONVERSATION_STYLE_TRAITS[conversationStyle].label}】`,
+      ...getConversationStyleTraits(conversationStyle),
+    ];
     const relationshipAdjustments = this.buildRelationshipAdjustments(
       personality,
       context.aiState.relationship,
+      context.conversationDifficulty.id,
     );
 
     return {
@@ -28,9 +37,18 @@ export class CharacterProfileBuilder {
     };
   }
 
+  private formatTraitLines(traitLines: string[]): string[] {
+    return traitLines
+      .filter((line) => line.length > 0)
+      .map((line) =>
+        line.startsWith("【") || line.startsWith("・") ? line : `・${line}`,
+      );
+  }
+
   private buildRelationshipAdjustments(
     personality: PersonalityType,
     relationship: RelationshipState,
+    difficulty: "Easy" | "Normal" | "Hard",
   ): string[] {
     const { interest, trust, comfort } = relationship;
     const adjustments: string[] = [];
@@ -38,36 +56,34 @@ export class CharacterProfileBuilder {
     if (trust < TRUST_LOW) {
       if (personality === "おとなしい" || personality === "クール") {
         adjustments.push(
-          "信頼がまだ低いため、さらに控えめに。自己開示は相手から聞かれるまで最小限にしてください。",
+          "信頼がまだ低いため、返答はさらに短く。相槌レベルでもよい。",
         );
       } else {
         adjustments.push(
-          "まだ心を開ききれていないため、自分の話は短めに。様子を見ながら返答してください。",
+          "まだ心を開いていないため、返答は短めに。自分から話さない。",
         );
       }
     } else if (trust >= TRUST_HIGH) {
       adjustments.push(
-        "信頼が育ってきたため、自分の話を少しずつ増やしてよい。ただし基本の人格は変えないでください。",
+        "信頼が育ってきたため、聞かれたことには少し詳しく答えてよい。基本の短さは維持。",
       );
     }
 
     if (interest < INTEREST_LOW) {
       adjustments.push(
-        "あまり興味が湧いていないため、質問は控えめに。リアクションもやや淡めにしてください。",
-      );
-    } else if (interest >= INTEREST_HIGH) {
-      adjustments.push(
-        "相手の話に興味を持っているため、質問を少し増やしてよい。話を広げようとしてください。",
+        "興味が湧いていないため、リアクションは淡め。質問はしない。",
       );
     }
 
     if (comfort < COMFORT_LOW) {
       adjustments.push(
-        "まだ緊張しているため、言葉選びは丁寧に。返答は短めでも構いません。",
+        "まだ緊張しているため、返答は短め。言葉選びは丁寧に。",
       );
-    } else if (comfort >= COMFORT_HIGH) {
+    }
+
+    if (difficulty === "Hard") {
       adjustments.push(
-        "リラックスできてきたため、自然な笑いや感想を少し増やしてよい。基本の話し方は維持してください。",
+        "Hard難易度: どんなに関係性が良くても、女性側から会話を広げない。",
       );
     }
 
@@ -82,7 +98,7 @@ export class CharacterProfileBuilder {
       "あなたは以下の人物です。",
       "この人格を会話終了まで一貫して維持してください。途中で性格や話し方を変えないでください。",
       "",
-      ...traitLines.map((line) => `・${line}`),
+      ...this.formatTraitLines(traitLines),
     ];
 
     if (relationshipAdjustments.length > 0) {
@@ -97,7 +113,7 @@ export class CharacterProfileBuilder {
     lines.push(
       "",
       "上記の人物像は、下記の会話ルールより優先されます。",
-      "会話ルールと矛盾する場合は、必ずこの人物像に従ってください。",
+      "ただし「会話をリードしない」「返答する役」は絶対に守ってください。",
     );
 
     return lines.join("\n");

@@ -11,6 +11,10 @@ export type {
   TopicDebugSnapshot,
   MemoryDebugSnapshot,
   MemoryDebugItem,
+  EmotionDebugSnapshot,
+  EmotionDebugChange,
+  RomanceDebugSnapshot,
+  FlowDebugSnapshot,
 } from "@/types/messageApi";
 export type {
   PromptContext,
@@ -35,10 +39,15 @@ export type {
   Evaluation,
   EvaluationAIInput,
   EvaluationImprovement,
+  EvaluationInternalReasons,
   EvaluationItemScores,
   EvaluationRawResult,
+  EvaluationReasonEntry,
   EvaluationVerdict,
 } from "@/types/Evaluation";
+export type { RomanceResult } from "@/ai/romance/RomanceState";
+export type { RomanceVerdict } from "@/constants/romanceVerdict";
+export type { FemaleEmotionState } from "@/ai/emotion/FemaleEmotionState";
 export type {
   CoachFemalePsychology,
   CoachStrength,

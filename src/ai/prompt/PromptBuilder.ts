@@ -51,14 +51,29 @@ export class PromptBuilder {
         content: characterProfile.formattedPrompt,
       },
       {
+        id: "conversationDifficulty",
+        title: "会話難易度",
+        content: this.sectionBuilder.buildConversationDifficulty(context),
+      },
+      {
         id: "conversationRule",
         title: "会話ルール",
-        content: this.sectionBuilder.buildConversationRule(),
+        content: this.sectionBuilder.buildConversationRule(context),
       },
       {
         id: "emotion",
         title: "現在の心理状態",
         content: this.sectionBuilder.buildEmotion(context),
+      },
+      {
+        id: "romance",
+        title: "恋愛的な距離感",
+        content: this.sectionBuilder.buildRomance(context),
+      },
+      {
+        id: "flow",
+        title: "会話フロー（今ターンの返答方針）",
+        content: this.sectionBuilder.buildFlow(context),
       },
       {
         id: "topic",
@@ -83,7 +98,7 @@ export class PromptBuilder {
       {
         id: "outputRule",
         title: "出力ルール",
-        content: this.sectionBuilder.buildOutputRule(),
+        content: this.sectionBuilder.buildOutputRule(context),
       },
     ];
 
