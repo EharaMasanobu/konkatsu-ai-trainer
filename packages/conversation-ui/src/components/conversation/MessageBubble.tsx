@@ -10,7 +10,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-base leading-relaxed whitespace-pre-wrap sm:max-w-[80%] sm:px-4 sm:py-3 ${
+        className={`max-w-[88%] rounded-2xl px-5 py-3.5 text-base leading-relaxed whitespace-pre-wrap sm:max-w-[80%] sm:px-6 sm:py-4 ${
           isUser
             ? "rounded-br-md bg-rose-500 text-white"
             : "rounded-bl-md border border-zinc-200 bg-white text-zinc-900 shadow-sm"

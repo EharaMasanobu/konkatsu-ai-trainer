@@ -1,7 +1,15 @@
+"use client";
+
+import { useCallback, useState } from "react";
+
 import { EvaluationDetail } from "../evaluation/EvaluationDetail";
 import { EvaluationRomanceSection } from "../evaluation/EvaluationRomanceSection";
 import { EvaluationScore } from "../evaluation/EvaluationScore";
-import { buttonPrimaryClassName } from "../ui/buttonStyles";
+import {
+  buttonPrimaryClassName,
+  buttonSecondaryClassName,
+} from "../ui/buttonStyles";
+import { downloadEvaluationPdf } from "../../utils/downloadEvaluationPdf";
 import type { Evaluation } from "@konkatsu/shared-types";
 
 interface EvaluationCardProps {
@@ -10,6 +18,25 @@ interface EvaluationCardProps {
 }
 
 export function EvaluationCard({ evaluation, onBackHome }: EvaluationCardProps) {
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = useCallback(() => {
+    setDownloadError(null);
+    setIsDownloading(true);
+    try {
+      downloadEvaluationPdf(evaluation);
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : "PDFの保存に失敗しました。もう一度お試しください。",
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [evaluation]);
+
   return (
     <article className="space-y-6 px-4 pb-6 sm:space-y-8 sm:pb-10">
       <header className="pt-4 text-center sm:pt-6">
@@ -31,7 +58,20 @@ export function EvaluationCard({ evaluation, onBackHome }: EvaluationCardProps) 
         <EvaluationDetail evaluation={evaluation} />
       </div>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 border-t border-zinc-200 bg-zinc-50/95 px-4 py-4 backdrop-blur-sm sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+      <div className="safe-bottom sticky bottom-0 -mx-4 space-y-3 border-t border-zinc-200 bg-zinc-50/95 px-4 py-4 backdrop-blur-sm sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+        {downloadError && (
+          <p role="alert" className="text-center text-sm text-red-600">
+            {downloadError}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
+          className={buttonSecondaryClassName}
+        >
+          {isDownloading ? "準備中..." : "PDFで保存"}
+        </button>
         <button
           type="button"
           onClick={onBackHome}
@@ -39,6 +79,9 @@ export function EvaluationCard({ evaluation, onBackHome }: EvaluationCardProps) 
         >
           ホームへ戻る
         </button>
+        <p className="text-center text-xs text-zinc-400">
+          「PDFで保存」を押すと印刷画面が開きます。送信先で「PDFに保存」を選んでください。
+        </p>
       </div>
     </article>
   );
