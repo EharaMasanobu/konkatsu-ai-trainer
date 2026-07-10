@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@konkatsu/config": "workspace:*",
+    "@types/node": "^20",
     "tsx": "^4.19.0",
     "typescript": "^5"
   }

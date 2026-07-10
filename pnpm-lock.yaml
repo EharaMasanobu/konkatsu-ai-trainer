@@ -111,6 +111,9 @@ importers:
       '@konkatsu/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
       tsx:
         specifier: ^4.19.0
         version: 4.23.0

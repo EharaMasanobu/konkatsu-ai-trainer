@@ -82,7 +82,7 @@ export class EvaluationPromptBuilder {
       cachedEvaluationTemplate = readFileSync(EVALUATION_TEMPLATE_PATH, "utf-8");
     }
 
-    return cachedEvaluationTemplate;
+    return cachedEvaluationTemplate ?? readFileSync(EVALUATION_TEMPLATE_PATH, "utf-8");
   }
 
   private applyTemplate(

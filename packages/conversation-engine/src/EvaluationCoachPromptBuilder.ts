@@ -66,7 +66,7 @@ export class EvaluationCoachPromptBuilder {
       cachedCoachTemplate = readFileSync(COACH_TEMPLATE_PATH, "utf-8");
     }
 
-    return cachedCoachTemplate;
+    return cachedCoachTemplate ?? readFileSync(COACH_TEMPLATE_PATH, "utf-8");
   }
 
   private applyTemplate(

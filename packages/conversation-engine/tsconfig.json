@@ -1,6 +1,8 @@
 {
   "extends": "@konkatsu/config/tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@engine/*": ["./src/*"],
