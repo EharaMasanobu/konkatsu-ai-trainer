@@ -16,9 +16,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             : "rounded-bl-md border border-zinc-200 bg-white text-zinc-900 shadow-sm"
         }`}
       >
-        <p className="mb-0.5 text-[11px] font-medium opacity-70 sm:text-xs">
-          {isUser ? "あなた" : "AI"}
-        </p>
         <p>{message.content}</p>
       </div>
     </div>

@@ -16,7 +16,7 @@ export function MessageList({
   bottomRef,
 }: MessageListProps) {
   return (
-    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 sm:space-y-4 sm:px-4 sm:py-4">
+    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4 sm:space-y-6 sm:px-4 sm:py-6">
       {messages.length === 0 && !isLoading && (
         <p className="py-8 text-center text-sm text-zinc-400">
           メッセージを入力して会話を始めましょう

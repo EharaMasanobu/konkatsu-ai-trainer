@@ -20,14 +20,14 @@ function ItemScoreBar({
   const percentage = max > 0 ? (value / max) * 100 : 0;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <div className="flex items-center justify-between text-sm">
         <span className="text-zinc-700">{label}</span>
         <span className="font-semibold text-zinc-900">
           {value} / {max}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+      <div className="h-2.5 overflow-hidden rounded-full bg-zinc-200">
         <div
           className="h-full rounded-full bg-rose-500 transition-all"
           style={{ width: `${percentage}%` }}
@@ -43,13 +43,13 @@ export function EvaluationScore({ evaluation }: EvaluationScoreProps) {
   >;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div className="text-center">
         <p className="text-sm font-medium text-zinc-500">会話スコア</p>
-        <p className="mt-2 text-6xl font-bold text-rose-600">{evaluation.score}</p>
-        <p className="text-sm text-zinc-500">/ 100点</p>
+        <p className="mt-3 text-6xl font-bold text-rose-600">{evaluation.score}</p>
+        <p className="mt-1 text-sm text-zinc-500">/ 100点</p>
         {evaluation.difficultyAdjustment !== 0 && (
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-2 text-xs text-zinc-400">
             素点 {evaluation.baseScore}点
             {evaluation.difficultyAdjustment > 0 ? " + " : " "}
             {evaluation.difficultyAdjustment !== 0
@@ -57,10 +57,10 @@ export function EvaluationScore({ evaluation }: EvaluationScoreProps) {
               : null}
           </p>
         )}
-        <p className="mt-2 text-sm text-zinc-600">{evaluation.bandLabel}</p>
+        <p className="mt-3 text-sm text-zinc-600">{evaluation.bandLabel}</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         <h3 className="text-sm font-semibold text-zinc-800">項目別スコア</h3>
         {itemEntries.map(([key, label]) => (
           <ItemScoreBar
