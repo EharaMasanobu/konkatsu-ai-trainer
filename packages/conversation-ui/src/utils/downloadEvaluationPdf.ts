@@ -211,30 +211,69 @@ export function buildEvaluationReportHtml(evaluation: Evaluation): string {
 </html>`;
 }
 
-export function downloadEvaluationPdf(evaluation: Evaluation): void {
-  const html = buildEvaluationReportHtml(evaluation);
-  const printWindow = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
+export function downloadEvaluationPdf(evaluation: Evaluation): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const html = buildEvaluationReportHtml(evaluation);
 
-  if (!printWindow) {
-    throw new Error(
-      "ポップアップがブロックされました。ブラウザの設定を確認して再度お試しください。",
-    );
-  }
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("title", "評価結果PDF");
+    iframe.setAttribute("aria-hidden", "true");
+    // 一部ブラウザは 0x0 iframe からの print を拒否するため、画面外に実サイズで置く
+    iframe.style.position = "fixed";
+    iframe.style.top = "0";
+    iframe.style.left = "0";
+    iframe.style.width = "794px";
+    iframe.style.height = "1123px";
+    iframe.style.border = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    iframe.style.zIndex = "-1";
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+    let settled = false;
+    const cleanup = () => {
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    };
 
-  const triggerPrint = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
+    const fail = (message: string) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error(message));
+    };
 
-  if (printWindow.document.readyState === "complete") {
-    window.setTimeout(triggerPrint, 250);
-  } else {
-    printWindow.addEventListener("load", () => {
-      window.setTimeout(triggerPrint, 250);
-    });
-  }
+    const succeed = () => {
+      if (settled) return;
+      settled = true;
+      window.setTimeout(cleanup, 1500);
+      resolve();
+    };
+
+    iframe.onload = () => {
+      window.setTimeout(() => {
+        try {
+          const frameWindow = iframe.contentWindow;
+          if (!frameWindow) {
+            fail("印刷用の画面を開けませんでした。");
+            return;
+          }
+          frameWindow.focus();
+          frameWindow.print();
+          succeed();
+        } catch {
+          fail("印刷ダイアログを開けませんでした。もう一度お試しください。");
+        }
+      }, 300);
+    };
+
+    document.body.appendChild(iframe);
+    iframe.srcdoc = html;
+
+    window.setTimeout(() => {
+      if (!settled) {
+        fail("印刷の準備がタイムアウトしました。もう一度お試しください。");
+      }
+    }, 8000);
+  });
 }

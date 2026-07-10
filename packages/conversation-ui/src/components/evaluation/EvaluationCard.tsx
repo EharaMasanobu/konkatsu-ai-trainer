@@ -24,17 +24,18 @@ export function EvaluationCard({ evaluation, onBackHome }: EvaluationCardProps) 
   const handleDownloadPdf = useCallback(() => {
     setDownloadError(null);
     setIsDownloading(true);
-    try {
-      downloadEvaluationPdf(evaluation);
-    } catch (error) {
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : "PDFの保存に失敗しました。もう一度お試しください。",
-      );
-    } finally {
-      setIsDownloading(false);
-    }
+
+    void downloadEvaluationPdf(evaluation)
+      .catch((error: unknown) => {
+        setDownloadError(
+          error instanceof Error
+            ? error.message
+            : "PDFの保存に失敗しました。もう一度お試しください。",
+        );
+      })
+      .finally(() => {
+        setIsDownloading(false);
+      });
   }, [evaluation]);
 
   return (
@@ -80,7 +81,7 @@ export function EvaluationCard({ evaluation, onBackHome }: EvaluationCardProps) 
           ホームへ戻る
         </button>
         <p className="text-center text-xs text-zinc-400">
-          「PDFで保存」を押すと印刷画面が開きます。送信先で「PDFに保存」を選んでください。
+          「PDFで保存」を押すと印刷ダイアログが開きます。送信先で「PDFに保存」を選んでください。
         </p>
       </div>
     </article>
