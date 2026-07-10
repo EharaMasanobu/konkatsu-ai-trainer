@@ -1,10 +1,9 @@
 [build]
 builder = "nixpacks"
-# Railway Variables に NODE_ENV が設定されていると next build が失敗するため、ビルド時は production を強制
-buildCommand = "NODE_ENV=production npm run build"
+buildCommand = "NODE_ENV=production corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build"
 
 [deploy]
-startCommand = "npm run start"
+startCommand = "pnpm --filter @konkatsu/web start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"

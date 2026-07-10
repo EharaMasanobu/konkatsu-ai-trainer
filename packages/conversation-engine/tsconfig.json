@@ -1,0 +1,11 @@
+{
+  "extends": "@konkatsu/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@engine/*": ["./src/*"],
+      "@konkatsu/shared-types": ["../shared-types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

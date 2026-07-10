@@ -1,0 +1,12 @@
+{
+  "extends": "@konkatsu/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@konkatsu/shared-types": ["../shared-types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

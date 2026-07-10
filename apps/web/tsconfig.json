@@ -1,0 +1,22 @@
+{
+  "extends": "@konkatsu/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@engine/*": ["../../packages/conversation-engine/src/*"],
+      "@konkatsu/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@konkatsu/conversation-engine": ["../../packages/conversation-engine/src/index.ts"],
+      "@konkatsu/conversation-ui": ["../../packages/conversation-ui/src/index.ts"]
+    },
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
