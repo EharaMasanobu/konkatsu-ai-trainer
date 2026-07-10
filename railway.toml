@@ -1,6 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "NODE_ENV=production corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build"
+# Railway Variables の NODE_ENV が next build に漏れると /_global-error の prerender が失敗する。
+# 先頭の `VAR=value cmd` は直後の1コマンドにしか効かないため、build 直前で明示する。
+buildCommand = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && NODE_ENV=production pnpm build"
 
 [deploy]
 startCommand = "pnpm --filter @konkatsu/web start"

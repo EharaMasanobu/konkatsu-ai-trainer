@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter @konkatsu/web dev",
     "build": "pnpm type-check && pnpm --filter @konkatsu/web build",
+    "start": "pnpm --filter @konkatsu/web start",
     "type-check": "pnpm -r run type-check",
     "lint": "pnpm --filter @konkatsu/web lint",
     "format": "prettier --write .",
