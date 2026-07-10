@@ -236,39 +236,43 @@ export function ConversationPage() {
   }
 
   return (
-    <main className="flex h-dvh flex-col bg-zinc-100">
+    <main className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-zinc-100">
       <ConversationHeader currentTurn={displayTurn} maxTurn={maxTurn} />
 
-      {isDev && debugTurnSummary && (
-        <TurnSummaryDebugPanel summary={debugTurnSummary} />
-      )}
-      {isDev && debugState && <AIStateDebugPanel state={debugState} />}
-      {isDev && debugEmotion && <EmotionDebugPanel emotion={debugEmotion} />}
-      {isDev && debugRomance && <RomanceDebugPanel romance={debugRomance} />}
-      {isDev && debugFlow && <FlowDebugPanel flow={debugFlow} />}
-      {isDev && debugTopic && <TopicDebugPanel topic={debugTopic} />}
-      {isDev && debugMemory && <MemoryDebugPanel memory={debugMemory} />}
-      {isDev && debugPromptPreview && (
-        <PromptDebugPanel preview={debugPromptPreview} />
-      )}
+      {(isDev || evaluationError) && (
+        <div className="safe-x max-h-[30dvh] shrink-0 overflow-y-auto overscroll-contain">
+          {isDev && debugTurnSummary && (
+            <TurnSummaryDebugPanel summary={debugTurnSummary} />
+          )}
+          {isDev && debugState && <AIStateDebugPanel state={debugState} />}
+          {isDev && debugEmotion && <EmotionDebugPanel emotion={debugEmotion} />}
+          {isDev && debugRomance && <RomanceDebugPanel romance={debugRomance} />}
+          {isDev && debugFlow && <FlowDebugPanel flow={debugFlow} />}
+          {isDev && debugTopic && <TopicDebugPanel topic={debugTopic} />}
+          {isDev && debugMemory && <MemoryDebugPanel memory={debugMemory} />}
+          {isDev && debugPromptPreview && (
+            <PromptDebugPanel preview={debugPromptPreview} />
+          )}
 
-      {evaluationError && (
-        <div
-          role="alert"
-          className="safe-x shrink-0 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          <p>{evaluationError}</p>
-          <button
-            type="button"
-            onClick={() => void runEvaluation()}
-            className="touch-target mt-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 active:bg-red-50"
-          >
-            再実行
-          </button>
+          {evaluationError && (
+            <div
+              role="alert"
+              className="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              <p>{evaluationError}</p>
+              <button
+                type="button"
+                onClick={() => void runEvaluation()}
+                className="touch-target mt-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-800 active:bg-red-50"
+              >
+                再実行
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      <section className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col sm:max-w-3xl">
+      <section className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-hidden sm:max-w-3xl">
         <MessageList
           messages={messages}
           isLoading={isLoading}
@@ -276,7 +280,7 @@ export function ConversationPage() {
         />
       </section>
 
-      <footer className="safe-bottom safe-x shrink-0 border-t border-zinc-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <footer className="safe-bottom safe-x z-10 shrink-0 border-t border-zinc-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="border-b border-zinc-100 py-3">
           <VoiceRecorder
             compact

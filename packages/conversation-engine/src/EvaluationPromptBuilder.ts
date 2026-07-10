@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import type { LLMChatMessage } from "@engine/providers/LLMProvider";
 import type { AIState } from "@engine/state/AIState";
 
@@ -8,15 +5,9 @@ import { formatAIStateForEvaluationPrompt } from "@engine/state/evaluationStateF
 import { formatFemaleEmotionForEvaluation } from "@engine/emotion/EmotionPromptFormatter";
 import { EvaluationCharacterContextBuilder } from "@engine/EvaluationCharacterContextBuilder";
 import { DIFFICULTY_BEHAVIOR } from "@engine/constants/difficultyBehavior";
+import { EVALUATION_SYSTEM_TEMPLATE } from "@engine/prompts/evaluation/systemTemplate";
 import type { EvaluationAIInput, FemaleProfile, UserProfile } from "@konkatsu/shared-types";
 import type { ConversationHistoryMessage } from "@konkatsu/shared-types";
-
-const EVALUATION_TEMPLATE_PATH = join(
-  process.cwd(),
-  "src/prompts/evaluation/system.md",
-);
-
-let cachedEvaluationTemplate: string | null = null;
 
 export class EvaluationPromptBuilder {
   constructor(
@@ -47,7 +38,7 @@ export class EvaluationPromptBuilder {
     );
     const emotionVars = formatFemaleEmotionForEvaluation(input.femaleEmotion);
 
-    return this.applyTemplate(this.loadEvaluationTemplate(), {
+    return this.applyTemplate(EVALUATION_SYSTEM_TEMPLATE, {
       user_profile: this.formatProfile(homeForm.userProfile),
       female_profile: this.formatProfile(homeForm.femaleProfile),
       personality: homeForm.personalitySetting.personality,
@@ -71,18 +62,6 @@ export class EvaluationPromptBuilder {
       female_emotion_context: emotionVars.female_emotion_context,
       conversation_history: this.formatConversationHistory(conversationHistory),
     });
-  }
-
-  private loadEvaluationTemplate(): string {
-    if (process.env.NODE_ENV === "development") {
-      return readFileSync(EVALUATION_TEMPLATE_PATH, "utf-8");
-    }
-
-    if (!cachedEvaluationTemplate) {
-      cachedEvaluationTemplate = readFileSync(EVALUATION_TEMPLATE_PATH, "utf-8");
-    }
-
-    return cachedEvaluationTemplate ?? readFileSync(EVALUATION_TEMPLATE_PATH, "utf-8");
   }
 
   private applyTemplate(

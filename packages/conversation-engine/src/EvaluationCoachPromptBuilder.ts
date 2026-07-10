@@ -1,24 +1,15 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import type { LLMChatMessage } from "@engine/providers/LLMProvider";
 import type { AIState } from "@engine/state/AIState";
 
 import { formatAIStateForEvaluationPrompt } from "@engine/state/evaluationStateFormat";
 import { DIFFICULTY_BEHAVIOR } from "@engine/constants/difficultyBehavior";
+import { EVALUATION_COACH_TEMPLATE } from "@engine/prompts/evaluation/coachTemplate";
 import type {
   ConversationHistoryMessage,
   EvaluationCoachInput,
   FemaleProfile,
   UserProfile,
 } from "@konkatsu/shared-types";
-
-const COACH_TEMPLATE_PATH = join(
-  process.cwd(),
-  "src/prompts/evaluation/coach.md",
-);
-
-let cachedCoachTemplate: string | null = null;
 
 export class EvaluationCoachPromptBuilder {
   buildCoachMessages(
@@ -44,7 +35,7 @@ export class EvaluationCoachPromptBuilder {
       aiState as AIState | undefined,
     );
 
-    return this.applyTemplate(this.loadCoachTemplate(), {
+    return this.applyTemplate(EVALUATION_COACH_TEMPLATE, {
       user_profile: this.formatProfile(homeForm.userProfile),
       female_profile: this.formatProfile(homeForm.femaleProfile),
       personality: homeForm.personalitySetting.personality,
@@ -59,14 +50,6 @@ export class EvaluationCoachPromptBuilder {
       conversation_count: stateVars.conversation_count,
       conversation_history: this.formatConversationHistory(conversationHistory),
     });
-  }
-
-  private loadCoachTemplate(): string {
-    if (!cachedCoachTemplate) {
-      cachedCoachTemplate = readFileSync(COACH_TEMPLATE_PATH, "utf-8");
-    }
-
-    return cachedCoachTemplate ?? readFileSync(COACH_TEMPLATE_PATH, "utf-8");
   }
 
   private applyTemplate(
